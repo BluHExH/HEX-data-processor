@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HEX Data Processor Configuration Schema",
+  "type": "object",
+  "required": ["project", "scraper", "targets", "storage"],
+  "properties": {
+    "project": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "description": {"type": "string"}
+      }
+    },
+    "scraper": {
+      "type": "object",
+      "required": ["user_agent", "timeout", "max_retries", "rate_limit"],
+      "properties": {
+        "user_agent": {"type": "string"},
+        "timeout": {"type": "integer", "minimum": 1, "maximum": 300},
+        "max_retries": {"type": "integer", "minimum": 0, "maximum": 10},
+        "rate_limit": {"type": "number", "minimum": 0.1},
+        "max_concurrent": {"type": "integer", "minimum": 1, "maximum": 50},
+        "headers": {"type": "object"}
+      }
+    },
+    "targets": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "type": "object",
+          "required": ["name", "base_url", "start_urls", "selectors"],
+          "properties": {
+            "name": {"type": "string"},
+            "base_url": {"type": "string", "format": "uri"},
+            "start_urls": {
+              "type": "array",
+              "items": {"type": "string", "format": "uri"}
+            },
+            "selectors": {"type": "object"},
+            "pagination": {
+              "type": "object",
+              "properties": {
+                "enabled": {"type": "boolean"},
+                "next_selector": {"type": "string"},
+                "max_pages": {"type": "integer", "minimum": 1}
+              }
+            },
+            "js_render": {"type": "boolean"},
+            "rate_limit": {"type": "number", "minimum": 0.1}
+          }
+        }
+      }
+    },
+    "cleaner": {
+      "type": "object",
+      "properties": {
+        "remove_duplicates": {"type": "boolean"},
+        "duplicate_keys": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "handle_missing": {
+          "type": "object",
+          "properties": {
+            "strategy": {"type": "string", "enum": ["default", "drop", "interpolate"]},
+            "default_values": {"type": "object"}
+          }
+        },
+        "field_validation": {"type": "object"}
+      }
+    },
+    "transformer": {
+      "type": "object",
+      "properties": {
+        "field_mapping": {"type": "object"},
+        "type_conversions": {"type": "object"},
+        "custom_functions": {"type": "object"}
+      }
+    },
+    "storage": {
+      "type": "object",
+      "required": ["type", "path"],
+      "properties": {
+        "type": {"type": "string", "enum": ["csv", "jsonl", "sqlite"]},
+        "path": {"type": "string"},
+        "filename_template": {"type": "string"},
+        "csv": {"type": "object"},
+        "jsonl": {"type": "object"},
+        "sqlite": {"type": "object"}
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "telegram": {"type": "object"},
+        "email": {"type": "object"},
+        "webhook": {"type": "object"}
+      }
+    },
+    "scheduler": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "timezone": {"type": "string"},
+        "jobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "target", "trigger"],
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "target": {"type": "string"},
+              "trigger": {"type": "string", "enum": ["cron", "interval", "date"]},
+              "cron": {"type": "object"},
+              "interval": {"type": "object"},
+              "date": {"type": "object"},
+              "enabled": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "port": {"type": "integer", "minimum": 1024, "maximum": 65535},
+        "endpoint": {"type": "string"},
+        "health_endpoint": {"type": "string"}
+      }
+    },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "level": {"type": "string", "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]},
+        "format": {"type": "string", "enum": ["json", "text"]},
+        "file": {"type": "string"},
+        "max_size": {"type": "string"},
+        "backup_count": {"type": "integer", "minimum": 1},
+        "console": {"type": "boolean"}
+      }
+    }
+  }
+}

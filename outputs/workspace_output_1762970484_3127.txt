@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/workspace/HEX-data-processor/src/config.py", line 74, in <module>
+    class HandleMissingConfig(BaseModel):
+  File "/workspace/HEX-data-processor/src/config.py", line 76, in HandleMissingConfig
+    strategy: str = Field(default="default", regex="^(default|drop|interpolate)$")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pydantic/fields.py", line 751, in Field
+    raise PydanticUserError('`regex` is removed. use `pattern` instead', code='removed-kwargs')
+pydantic.errors.PydanticUserError: `regex` is removed. use `pattern` instead
+
+For further information visit https://errors.pydantic.dev/2.6/u/removed-kwargs

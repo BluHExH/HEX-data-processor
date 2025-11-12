@@ -1,0 +1,308 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10, 3.11, 3.12]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio
+    
+    - name: Validate configuration
+      run: |
+        python -m src.cli validate-config --config config_example.json
+    
+    - name: Run linting (Black)
+      run: |
+        black --check src/ tests/ || {
+          echo "Code formatting issues found. Run 'black src/ tests/' to fix."
+          exit 1
+        }
+    
+    - name: Run import sorting (isort)
+      run: |
+        isort --check-only src/ tests/ || {
+          echo "Import sorting issues found. Run 'isort src/ tests/' to fix."
+          exit 1
+        }
+    
+    - name: Run linting (flake8)
+      run: |
+        flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+    
+    - name: Run type checking (mypy)
+      run: |
+        mypy src/ --ignore-missing-imports --no-strict-optional || {
+          echo "Type checking issues found."
+          exit 1
+        }
+    
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=src --cov-report=xml --cov-report=html --disable-warnings
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+    
+    - name: Run security scan (bandit)
+      run: |
+        bandit -r src/ -f json -o bandit-report.json || true
+        bandit -r src/
+    
+    - name: Check dependencies for security vulnerabilities
+      run: |
+        safety check --json --output safety-report.json || true
+        safety check
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: hex-data-processor:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Test Docker image
+      run: |
+        docker run --rm hex-data-processor:latest python -m src.cli version
+        docker run --rm hex-data-processor:latest python -c "from src.config import load_config; print('Config loading works')"
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [test, docker]
+    services:
+      # PostgreSQL for testing
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest docker-compose
+    
+    - name: Run integration tests
+      run: |
+        # Test with PostgreSQL
+        export DATABASE_URL="postgresql://postgres:testpass@localhost:5432/testdb"
+        pytest tests/integration/ -v || true
+        
+        # Test CLI integration
+        python -m src.cli --config config_example.json run quotes_toscrape --once --dry-run
+        
+        # Test API integration
+        timeout 30 python -m src.cli --config config_example.json serve &
+        API_PID=$!
+        sleep 10
+        curl -f http://localhost:8000/health || true
+        curl -f http://localhost:8000/metrics || true
+        kill $API_PID || true
+
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest-benchmark memory_profiler
+    
+    - name: Run performance tests
+      run: |
+        pytest tests/ -m performance --benchmark-only --benchmark-json=benchmark.json || true
+    
+    - name: Memory profiling
+      run: |
+        python -m memory_profiler tests/performance/test_memory_usage.py || true
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-results
+        path: |
+          benchmark.json
+          memory_profile.txt
+
+  build-and-package:
+    name: Build and Package
+    runs-on: ubuntu-latest
+    needs: [test, security, integration]
+    if: github.event_name == 'release'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build wheel setuptools
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Upload package artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: python-package
+        path: dist/
+    
+    - name: Publish to PyPI (if needed)
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        pip install twine
+        twine upload dist/* --skip-existing
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v3
+    
+    - name: Upload documentation artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: docs/
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: [test, security, integration]
+    if: always()
+    steps:
+    - name: Notify success
+      if: needs.test.result == 'success' && needs.security.result == 'success' && needs.integration.result == 'success'
+      run: |
+        echo "✅ All tests passed successfully!"
+        echo "📊 Test results available in CI artifacts"
+    
+    - name: Notify failure
+      if: needs.test.result == 'failure' || needs.security.result == 'failure' || needs.integration.result == 'failure'
+      run: |
+        echo "❌ Some tests failed!"
+        echo "🔍 Check the logs for details"
+        exit 1

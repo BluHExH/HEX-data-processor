@@ -1,0 +1,150 @@
+{
+  "project": {
+    "name": "HEX-data-processor",
+    "version": "1.0.0",
+    "description": "Data processing pipeline for web scraping and transformation"
+  },
+  "scraper": {
+    "user_agent": "HEX-Data-Processor/1.0",
+    "timeout": 30,
+    "max_retries": 3,
+    "rate_limit": 1.0,
+    "max_concurrent": 10,
+    "headers": {
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Accept-Encoding": "gzip, deflate"
+    }
+  },
+  "targets": {
+    "quotes_toscrape": {
+      "name": "Quotes to Scrape",
+      "base_url": "http://quotes.toscrape.com",
+      "start_urls": ["http://quotes.toscrape.com"],
+      "selectors": {
+        "quote": "div.quote",
+        "text": "span.text::text",
+        "author": "small.author::text",
+        "tags": "div.tags a.tag::text"
+      },
+      "pagination": {
+        "enabled": true,
+        "next_selector": "li.next a::attr(href)",
+        "max_pages": 10
+      },
+      "js_render": false,
+      "rate_limit": 1.0
+    }
+  },
+  "cleaner": {
+    "remove_duplicates": true,
+    "duplicate_keys": ["text", "author"],
+    "handle_missing": {
+      "strategy": "default",
+      "default_values": {
+        "text": "N/A",
+        "author": "Unknown",
+        "tags": []
+      }
+    },
+    "field_validation": {
+      "text": {"required": true, "type": "string"},
+      "author": {"required": true, "type": "string"},
+      "tags": {"required": false, "type": "array"}
+    }
+  },
+  "transformer": {
+    "field_mapping": {
+      "text": "quote_text",
+      "author": "quote_author",
+      "tags": "quote_tags"
+    },
+    "type_conversions": {
+      "quote_text": "string",
+      "quote_author": "string",
+      "quote_tags": "array"
+    },
+    "custom_functions": {
+      "quote_length": "lambda item: len(item.get('quote_text', ''))",
+      "author_initials": "lambda item: ''.join([name[0].upper() for name in item.get('quote_author', '').split()])"
+    }
+  },
+  "storage": {
+    "type": "csv",
+    "path": "data/output",
+    "filename_template": "{target_name}_{timestamp}.csv",
+    "csv": {
+      "delimiter": ",",
+      "quoting": 1,
+      "encoding": "utf-8"
+    },
+    "jsonl": {
+      "encoding": "utf-8",
+      "ensure_ascii": false
+    },
+    "sqlite": {
+      "database_url": "sqlite:///./data/output/hex_processor.db",
+      "table_name": "scraped_data"
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "telegram": {
+      "enabled": false,
+      "bot_token": "${TELEGRAM_BOT_TOKEN}",
+      "chat_id": "${TELEGRAM_CHAT_ID}",
+      "on_success": true,
+      "on_error": true
+    },
+    "email": {
+      "enabled": false,
+      "smtp_host": "${SMTP_HOST}",
+      "smtp_port": 587,
+      "username": "${SMTP_USERNAME}",
+      "password": "${SMTP_PASSWORD}",
+      "use_tls": true,
+      "from_address": "${SMTP_USERNAME}",
+      "to_addresses": ["admin@example.com"],
+      "on_success": true,
+      "on_error": true
+    },
+    "webhook": {
+      "enabled": false,
+      "url": "${WEBHOOK_URL}",
+      "timeout": 10,
+      "on_success": true,
+      "on_error": true
+    }
+  },
+  "scheduler": {
+    "enabled": true,
+    "timezone": "UTC",
+    "jobs": [
+      {
+        "id": "quotes_daily",
+        "name": "Daily Quotes Scraping",
+        "target": "quotes_toscrape",
+        "trigger": "cron",
+        "cron": {
+          "hour": "9",
+          "minute": "0"
+        },
+        "enabled": true
+      }
+    ]
+  },
+  "metrics": {
+    "enabled": true,
+    "port": 8000,
+    "endpoint": "/metrics",
+    "health_endpoint": "/health"
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "file": "logs/app.log",
+    "max_size": "10MB",
+    "backup_count": 5,
+    "console": true
+  }
+}

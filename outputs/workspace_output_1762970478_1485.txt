@@ -1,0 +1,53 @@
+Collecting python-dotenv
+  Downloading python_dotenv-1.2.1-py3-none-any.whl.metadata (25 kB)
+Requirement already satisfied: pydantic in /usr/local/lib/python3.11/site-packages (2.6.1)
+Collecting httpx
+  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting beautifulsoup4
+  Downloading beautifulsoup4-4.14.2-py3-none-any.whl.metadata (3.8 kB)
+Collecting aiofiles
+  Downloading aiofiles-25.1.0-py3-none-any.whl.metadata (6.3 kB)
+Collecting prometheus-client
+  Downloading prometheus_client-0.23.1-py3-none-any.whl.metadata (1.9 kB)
+Requirement already satisfied: fastapi in /usr/local/lib/python3.11/site-packages (0.115.12)
+Requirement already satisfied: uvicorn in /usr/local/lib/python3.11/site-packages (0.34.0)
+Requirement already satisfied: click in /usr/local/lib/python3.11/site-packages (8.3.0)
+Collecting tenacity
+  Downloading tenacity-9.1.2-py3-none-any.whl.metadata (1.2 kB)
+Collecting python-json-logger
+  Downloading python_json_logger-4.0.0-py3-none-any.whl.metadata (4.0 kB)
+Requirement already satisfied: annotated-types>=0.4.0 in /usr/local/lib/python3.11/site-packages (from pydantic) (0.7.0)
+Requirement already satisfied: pydantic-core==2.16.2 in /usr/local/lib/python3.11/site-packages (from pydantic) (2.16.2)
+Requirement already satisfied: typing-extensions>=4.6.1 in /usr/local/lib/python3.11/site-packages (from pydantic) (4.15.0)
+Requirement already satisfied: anyio in /usr/local/lib/python3.11/site-packages (from httpx) (4.11.0)
+Collecting certifi (from httpx)
+  Downloading certifi-2025.11.12-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx)
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Requirement already satisfied: idna in /usr/local/lib/python3.11/site-packages (from httpx) (3.11)
+Requirement already satisfied: h11>=0.16 in /usr/local/lib/python3.11/site-packages (from httpcore==1.*->httpx) (0.16.0)
+Collecting soupsieve>1.2 (from beautifulsoup4)
+  Downloading soupsieve-2.8-py3-none-any.whl.metadata (4.6 kB)
+Requirement already satisfied: starlette<0.47.0,>=0.40.0 in /usr/local/lib/python3.11/site-packages (from fastapi) (0.46.2)
+Requirement already satisfied: sniffio>=1.1 in /usr/local/lib/python3.11/site-packages (from anyio->httpx) (1.3.1)
+Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 73.5/73.5 kB 5.8 MB/s eta 0:00:00
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.8/78.8 kB 16.3 MB/s eta 0:00:00
+Downloading beautifulsoup4-4.14.2-py3-none-any.whl (106 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 106.4/106.4 kB 26.3 MB/s eta 0:00:00
+Downloading aiofiles-25.1.0-py3-none-any.whl (14 kB)
+Downloading prometheus_client-0.23.1-py3-none-any.whl (61 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 61.1/61.1 kB 27.1 MB/s eta 0:00:00
+Downloading tenacity-9.1.2-py3-none-any.whl (28 kB)
+Downloading python_json_logger-4.0.0-py3-none-any.whl (15 kB)
+Downloading soupsieve-2.8-py3-none-any.whl (36 kB)
+Downloading certifi-2025.11.12-py3-none-any.whl (159 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 159.4/159.4 kB 36.9 MB/s eta 0:00:00
+Installing collected packages: tenacity, soupsieve, python-json-logger, python-dotenv, prometheus-client, certifi, aiofiles, httpcore, beautifulsoup4, httpx
+Successfully installed aiofiles-25.1.0 beautifulsoup4-4.14.2 certifi-2025.11.12 httpcore-1.0.9 httpx-0.28.1 prometheus-client-0.23.1 python-dotenv-1.2.1 python-json-logger-4.0.0 soupsieve-2.8 tenacity-9.1.2
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 24.0 -> 25.3
+[notice] To update, run: pip install --upgrade pip

@@ -1,0 +1,43 @@
+# Core dependencies
+pydantic>=2.5.0
+httpx>=0.25.0
+beautifulsoup4>=4.12.0
+aiofiles>=23.2.0
+sqlalchemy>=2.0.0
+
+# Optional JS rendering (install separately if needed)
+# playwright>=1.40.0
+# selenium>=4.15.0
+
+# Storage and data
+pandas>=2.1.0
+python-dotenv>=1.0.0
+
+# Scheduling
+apscheduler>=3.10.0
+
+# Metrics and API
+prometheus-client>=0.19.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
+# Notifications
+python-telegram-bot>=20.0
+aiohttp>=3.9.0
+
+# Utilities
+tenacity>=8.2.0
+click>=8.1.0
+python-dateutil>=2.8.0
+pytz>=2023.3
+python-json-logger>=2.0.0
+
+# Development tools (install with pip install -r requirements-dev.txt)
+black>=23.10.0
+isort>=5.12.0
+flake8>=6.1.0
+mypy>=1.7.0
+pre-commit>=3.5.0
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0

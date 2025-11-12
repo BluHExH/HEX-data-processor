@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspace/HEX-data-processor/test_integration.py", line 15, in <module>
+    from src.config import load_config
+  File "/workspace/HEX-data-processor/src/config.py", line 14, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'

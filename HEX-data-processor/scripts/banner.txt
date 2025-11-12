@@ -1,0 +1,40 @@
+${CYAN}
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║  ████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗     ███████╗  ║
+║  ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔══██╗██║     ██╔════╝  ║
+║     ██║   █████╗  ██████╔╝██╔████╔██║██║██╔██╗ ██║███████║██║     █████╗    ║
+║     ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║██║╚██╗██║██╔══██║██║     ██╔══╝    ║
+║     ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗███████╗  ║
+║     ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚══════╝  ║
+║                                                                              ║
+║                         ${YELLOW}DATA PROCESSOR${CYAN}                              ║
+║                                                                              ║
+║                     ${GREEN}Production-ready Web Scraping Tool${CYAN}                ║
+║                                                                              ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+${NC}
+
+${BLUE}Features:${NC}
+  • Async web scraping with BeautifulSoup
+  • Data cleaning and transformation pipeline
+  • Multiple storage backends (CSV, JSONL, SQLite)
+  • Built-in notifications (Telegram, Email, Webhook)
+  • Prometheus metrics and health endpoints
+  • APScheduler for automated runs
+  • Docker containerization
+  • Comprehensive CLI interface
+
+${BLUE}Quick Start:${NC}
+  ${GREEN}bash scripts/setup.sh${NC}    # Setup environment
+  ${GREEN}bash scripts/run.sh${NC}       # Interactive menu
+  ${GREEN}python -m src.cli --help${NC} # CLI help
+
+${BLUE}Documentation:${NC}
+  ${CYAN}https://github.com/hex-data-processor/hex-data-processor${NC}
+
+${BLUE}Version:${NC} ${GREEN}1.0.0${NC}  |  ${BLUE}License:${NC} ${GREEN}MIT${NC}
+${YELLOW}
+⚠️  ${NC}IMPORTANT: Always respect robots.txt and website terms of service
+${YELLOW}
+⚠️  ${NC}IMPORTANT: Do not collect personal or sensitive data without permission
